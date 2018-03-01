@@ -6,16 +6,26 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
+import com.zz.bookmanager.dao.UserDao;
+import com.zz.bookmanager.model.User;
+import com.zz.bookmanager.utils.DbUtil;
+import com.zz.bookmanager.utils.StringUtil;
+
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.ImageIcon;
 import java.awt.Font;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.UIManager;
 import javax.swing.JPasswordField;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.awt.event.ActionEvent;
 
 public class LogOnFrm extends JFrame {
@@ -23,6 +33,8 @@ public class LogOnFrm extends JFrame {
 	private JPanel contentPane;
 	private JTextField userNameTxt;
 	private JPasswordField passwordTxt;
+	private DbUtil dbutil = new DbUtil();
+	private UserDao userDao = new UserDao();
 
 	/**
 	 * Launch the application.
@@ -44,6 +56,15 @@ public class LogOnFrm extends JFrame {
 	 * Create the frame.
 	 */
 	public LogOnFrm() {
+		Font font = new Font("Dialog", Font.PLAIN, 12);
+		java.util.Enumeration keys = UIManager.getDefaults().keys();
+		while (keys.hasMoreElements()) {
+			Object key = keys.nextElement();
+			Object value = UIManager.get(key);
+			if (value instanceof javax.swing.plaf.FontUIResource) {
+				UIManager.put(key, font);
+			}
+		}
 		setResizable(false);
 		setTitle("图书管理员登录");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -68,6 +89,11 @@ public class LogOnFrm extends JFrame {
 		passwordTxt = new JPasswordField();
 		
 		JButton button = new JButton("登录");
+		button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				login(e);
+			}
+		});
 		button.setIcon(new ImageIcon(LogOnFrm.class.getResource("/images/login.png")));
 		
 		JButton button_1 = new JButton("重置");
@@ -125,12 +151,50 @@ public class LogOnFrm extends JFrame {
 		contentPane.setLayout(gl_contentPane);
 	}
 
+	private void login(ActionEvent event) {
+		// TODO Auto-generated method stub
+	String userName=userNameTxt.getText();
+	String password = new String(passwordTxt.getPassword());
+	if(StringUtil.isEmpty(userName)) {
+		JOptionPane.showMessageDialog(null, "用户名不能为空");
+		return;
+	}
+	if(StringUtil.isEmpty(password)) {
+		JOptionPane.showMessageDialog(null, "密码不能为空");
+		return;
+	}
+	User user = new User(userName,password);
+		Connection conn =null; 
+		
+		try {
+			conn = dbutil.getConn();
+		User  newUser=userDao.login(conn, user);
+		if(newUser == null) {
+			JOptionPane.showMessageDialog(null, "用户名密码错误");
+		}else {
+			JOptionPane.showMessageDialog(null, "登录成功");
+		}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
 	/**
 	 * 重置登录参数
 	 * @param e
 	 */
 	private void resetValueAcitonPerformed(ActionEvent evt) {
 		// TODO Auto-generated method stub
+		userNameTxt.setText("");
+		passwordTxt.setText("");
 		
 	}
 }
