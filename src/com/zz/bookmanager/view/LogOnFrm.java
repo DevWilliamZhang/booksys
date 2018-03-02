@@ -149,6 +149,7 @@ public class LogOnFrm extends JFrame {
 					.addContainerGap(79, Short.MAX_VALUE))
 		);
 		contentPane.setLayout(gl_contentPane);
+		this.setLocationRelativeTo(null);
 	}
 
 	private void login(ActionEvent event) {
@@ -173,6 +174,8 @@ public class LogOnFrm extends JFrame {
 			JOptionPane.showMessageDialog(null, "用户名密码错误");
 		}else {
 			JOptionPane.showMessageDialog(null, "登录成功");
+			dispose();
+			new MainFrm().setVisible(true);
 		}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
